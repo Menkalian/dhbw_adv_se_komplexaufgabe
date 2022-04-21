@@ -1,25 +1,23 @@
 plugins {
-    application
+    java
 }
 
-repositories {
-    mavenCentral()
-}
+subprojects {
+    group = "dhbw.ase"
+    version = "0.0.1"
 
-dependencies {
-}
+    repositories {
+        mavenCentral()
+    }
 
-application {
-    // Define the main class for the gradle `run`-Task
-    mainClass.set("dhbw.inf.ase.komplexaufgabe.App")
-}
-
-testing {
-    suites {
-        // Configure the built-in test suite
-        val test by getting(JvmTestSuite::class) {
-            // Use JUnit Jupiter test framework
-            useJUnitJupiter("5.8.1")
+    pluginManager.withPlugin("java") {
+        testing {
+            suites {
+                val test by getting(JvmTestSuite::class) {
+                    // Use JUnit Jupiter test framework
+                    useJUnitJupiter("5.8.1")
+                }
+            }
         }
     }
 }

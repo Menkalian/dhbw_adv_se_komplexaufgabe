@@ -1,8 +1,5 @@
 package dhbw.ase.util.loader;
 
-import dhbw.ase.tsp.City;
-import dhbw.ase.util.ILoader;
-
 import java.io.FileNotFoundException;
 import java.io.InputStream;
 import java.net.URL;
@@ -10,6 +7,9 @@ import java.nio.charset.StandardCharsets;
 import java.util.List;
 import java.util.regex.Pattern;
 import java.util.stream.Collectors;
+
+import dhbw.ase.tsp.City;
+import dhbw.ase.util.ILoader;
 
 public class LoaderImpl implements ILoader {
     @Override
@@ -40,13 +40,14 @@ public class LoaderImpl implements ILoader {
     }
 
     private List<City> parseCities(String data) {
-        Pattern validLinePattern = Pattern.compile("\\S+ \\d{1,3} \\d{1,3}");
+        Pattern validLinePattern = Pattern.compile(" *\\S+ +\\d{1,3} +\\d{1,3}");
         return data.lines()
                    .filter((s) -> validLinePattern.matcher(s).matches())
                    .map((s) -> {
-                       String[] sections = s.split(" ");
+                       // Regex-Explanation: Do split at multiple spaces, but only if they are behind any non-space
+                       String[] sections = s.split("(?<=\\S) +");
                        return new City(
-                               sections[0],
+                               sections[0].trim(),
                                Integer.parseInt(sections[1]),
                                Integer.parseInt(sections[2])
                        );

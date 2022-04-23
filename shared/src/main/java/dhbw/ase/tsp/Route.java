@@ -24,22 +24,26 @@ public class Route {
 
     public double getTotalDistance() {
         // Iterate over the Inizes
-        return IntStream.range(0,cityOrder.size())
-                .mapToDouble(this::distanceForIndex)
-                .sum();
-    }
-
-    private double distanceForIndex(int i) {
-        City first = cityOrder.get(i);
-        City second = cityOrder.get((i + 1) % cityOrder.size());
-
-        return first.distance(second);
+        return IntStream.range(0, cityOrder.size())
+                        .mapToDouble(this::distanceForIndex)
+                        .sum();
     }
 
     public Route shuffled() {
         List<City> shuffled = new ArrayList<>(cityOrder);
         Collections.shuffle(shuffled);
         return new Route(shuffled);
+    }
+
+    public Transpositions difference(Route other) {
+        // TODO: Löh
+        // Difference is defined as the minimal amount of swaps necessary to reach the same route
+        return null;
+    }
+
+    @Override
+    public int hashCode() {
+        return Objects.hash(getCityOrder());
     }
 
     @Override
@@ -55,12 +59,14 @@ public class Route {
     }
 
     @Override
-    public int hashCode() {
-        return Objects.hash(getCityOrder());
-    }
-
-    @Override
     public String toString() {
         return "{" + cityOrder.stream().map(City::getName).collect(Collectors.joining(" -> ")) + "}";
+    }
+
+    private double distanceForIndex(int i) {
+        City first = cityOrder.get(i);
+        City second = cityOrder.get((i + 1) % cityOrder.size());
+
+        return first.distance(second);
     }
 }

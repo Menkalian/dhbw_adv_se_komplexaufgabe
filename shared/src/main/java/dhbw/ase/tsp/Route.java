@@ -3,6 +3,7 @@ package dhbw.ase.tsp;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
+import java.util.Objects;
 import java.util.stream.Collectors;
 import java.util.stream.IntStream;
 
@@ -39,6 +40,23 @@ public class Route {
         List<City> shuffled = new ArrayList<>(cityOrder);
         Collections.shuffle(shuffled);
         return new Route(shuffled);
+    }
+
+    @Override
+    public boolean equals(Object o) {
+        if (this == o) {
+            return true;
+        }
+        if (!(o instanceof Route)) {
+            return false;
+        }
+        Route route = (Route) o;
+        return Objects.equals(getCityOrder(), route.getCityOrder());
+    }
+
+    @Override
+    public int hashCode() {
+        return Objects.hash(getCityOrder());
     }
 
     @Override

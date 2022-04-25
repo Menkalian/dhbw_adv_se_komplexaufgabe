@@ -1,10 +1,12 @@
 package dhbw.ase.app2.pso;
 
+import dhbw.ase.log.Logger;
 import dhbw.ase.random.MersenneTwisterFast;
 import dhbw.ase.tsp.Route;
 import dhbw.ase.tsp.Transpositions;
 
 public class Particle {
+    private final static Logger logger = Logger.getLogger(Particle.class);
     ParticleSwarmOptimization sharedState;
     MersenneTwisterFast rng;
 
@@ -58,6 +60,7 @@ public class Particle {
         double score = route.getTotalDistance();
 
         if (score < personalBest) {
+            logger.debug("Neue (lokal) beste Route: (Länge %01.4f): %s", score, route);
             personalBest = score;
             personalBestRoute = route;
             sharedState.checkUpdateGBest(score, route);

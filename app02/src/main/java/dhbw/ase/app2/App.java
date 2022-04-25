@@ -1,8 +1,5 @@
 package dhbw.ase.app2;
 
-import java.util.List;
-import java.util.stream.Collectors;
-
 import dhbw.ase.app2.pso.ParticleSwarmOptimization;
 import dhbw.ase.app2.pso.PsoParameters;
 import dhbw.ase.log.LogLevel;
@@ -13,6 +10,9 @@ import dhbw.ase.util.ILoader;
 import dhbw.ase.util.loader.Dataset;
 import dhbw.ase.util.loader.LoaderImpl;
 
+import java.util.List;
+import java.util.stream.Collectors;
+
 public class App {
     /**
      * Used algorithm: PSO
@@ -20,8 +20,12 @@ public class App {
      * Some inspiration for applying the algorithm to the TSP taken from:
      * <a href="http://wwwmayr.informatik.tu-muenchen.de/konferenzen/Ferienakademie14/literature/HMHW11.pdf">http://wwwmayr.informatik.tu-muenchen.de/konferenzen/Ferienakademie14/literature/HMHW11.pdf</a>
      */
+
+    private static final Logger logger = Logger.getLogger(App.class);
+
     public static void main(String[] args) {
         Logger.setLogLevel(LogLevel.TRACE);
+        logger.system("Komplexaufgabe App 02 - Start");
         System.out.println("Advanced Software Engineering");
         PsoParameters psoParameters = new PsoParameters(
                 10000,

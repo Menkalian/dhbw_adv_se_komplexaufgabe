@@ -1,6 +1,10 @@
 package dhbw.ase.tsp;
 
-import java.util.*;
+import java.util.ArrayList;
+import java.util.Collections;
+import java.util.LinkedList;
+import java.util.List;
+import java.util.Objects;
 import java.util.stream.Collectors;
 import java.util.stream.IntStream;
 
@@ -22,8 +26,8 @@ public class Route {
     public double getTotalDistance() {
         // Iterate over the Indizes
         return IntStream.range(0, cityOrder.size())
-                .mapToDouble(this::distanceForIndex)
-                .sum();
+                        .mapToDouble(this::distanceForIndex)
+                        .sum();
     }
 
     public Route shuffled() {
@@ -33,13 +37,25 @@ public class Route {
     }
 
     public Transpositions difference(Route other) {
-        //toDo theoretically optimisable
         //Difference is defined as the set of swaps necessary to reach the same route
+        List<City> adaptedRoute = new LinkedList<>(cityOrder);
+        List<City> otherRoute = other.getCityOrder();
+
         List<Transposition> transpositions = new LinkedList<>();
-        for (int i = 0; i < other.cityOrder.size(); i++) {
-            if (other.cityOrder.get(i).equals(cityOrder.get(i)))
-                transpositions.add(new Transposition(other.cityOrder.get(i), cityOrder.get(i)));
+
+        for (int i = 0 ; i < other.cityOrder.size() ; i++) {
+            City c1 = adaptedRoute.get(i);
+            City c2 = otherRoute.get(i);
+
+            if (!c1.equals(c2)) {
+                transpositions.add(new Transposition(c1, c2));
+                // Apply swap to the adapted route
+                Collections.swap(adaptedRoute, i, adaptedRoute.indexOf(c2));
+            }
         }
+
+        // TODO: Reduce to minimal amount of swaps
+
         return new Transpositions(transpositions);
     }
 

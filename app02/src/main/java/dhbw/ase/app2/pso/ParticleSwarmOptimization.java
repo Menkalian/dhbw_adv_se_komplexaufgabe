@@ -1,15 +1,15 @@
 package dhbw.ase.app2.pso;
 
-import dhbw.ase.app2.Config;
-import dhbw.ase.tsp.City;
-import dhbw.ase.tsp.Route;
-
 import java.util.Collections;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.concurrent.CountDownLatch;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
+
+import dhbw.ase.app2.Config;
+import dhbw.ase.tsp.City;
+import dhbw.ase.tsp.Route;
 
 public class ParticleSwarmOptimization {
     private final List<City> cities;
@@ -35,12 +35,20 @@ public class ParticleSwarmOptimization {
 
     public Route findOptimalRoute() {
         // initialize
+        iterationLatch = new CountDownLatch(particles.size());
+
         for (Particle particle : particles) {
             executorService.submit(particle::initialize);
         }
 
+        try {
+            iterationLatch.await();
+        } catch (InterruptedException e) {
+            throw new RuntimeException(e);
+        }
+
         long iteration = 0;
-        while (++iteration < parameters.getMaxIterations() && !particlesConverged()) {
+        do {
             iterationLatch = new CountDownLatch(particles.size());
 
             for (Particle particle : particles) {
@@ -52,19 +60,12 @@ public class ParticleSwarmOptimization {
             } catch (InterruptedException e) {
                 throw new RuntimeException(e);
             }
-        }
+        } while (++iteration < parameters.getMaxIterations() && !particlesConverged());
 
         // After the last iteration no tasks remain, so we do not need to wait for the service to shut down
         executorService.shutdown();
 
         return globalBestRoute;
-    }
-
-    private boolean particlesConverged() {
-        // Check if particles are converging
-        double min = particles.stream().map((p) -> p.personalBest).min(Double::compareTo).get();
-        double max = particles.stream().map((p) -> p.personalBest).max(Double::compareTo).get();
-        return max - min < 0.001;
     }
 
     public List<City> getCities() {
@@ -94,5 +95,12 @@ public class ParticleSwarmOptimization {
                 globalBestRoute = route;
             }
         }
+    }
+
+    private boolean particlesConverged() {
+        // Check if particles are converging
+        double min = particles.stream().map((p) -> p.personalBest).min(Double::compareTo).get();
+        double max = particles.stream().map((p) -> p.personalBest).max(Double::compareTo).get();
+        return max - min < 0.001;
     }
 }

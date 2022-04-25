@@ -8,7 +8,7 @@ public class Particle {
     ParticleSwarmOptimization sharedState;
     MersenneTwisterFast rng;
 
-    double personalBest;
+    double personalBest = Double.MAX_VALUE;
     Route personalBestRoute;
 
     Route coordinates;
@@ -24,6 +24,8 @@ public class Particle {
         velocity = coordinates.difference(coordinates.shuffled());
 
         updatePersonalBest();
+
+        sharedState.countDown();
     }
 
     public void runIteration() {

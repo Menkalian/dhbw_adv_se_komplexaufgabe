@@ -4,14 +4,10 @@ import java.time.Instant;
 import java.time.OffsetDateTime;
 import java.time.ZoneId;
 import java.time.format.DateTimeFormatter;
-import java.util.concurrent.ExecutorService;
-import java.util.concurrent.Executors;
-import java.util.concurrent.TimeUnit;
 
 public class Logger {
     private static final int MAX_LOG_NAME_LENGTH = 20;
     private static final Logger log = new Logger("Logging");
-    private static final ExecutorService logExecutor = Executors.newSingleThreadExecutor();
 
     private static LogLevel maxLogLevel = LogLevel.INFO;
     private final String name;
@@ -29,15 +25,6 @@ public class Logger {
         log.debug("Setze LogLevel auf %s", maxLogLevel);
     }
 
-    public static void shutdown() {
-        logExecutor.shutdown();
-        try {
-            logExecutor.awaitTermination(5, TimeUnit.MINUTES);
-        } catch (InterruptedException e) {
-            throw new RuntimeException(e);
-        }
-    }
-
     public static Logger getLogger(String name) {
         return new Logger(name != null ? name : "null");
     }
@@ -47,7 +34,7 @@ public class Logger {
     }
 
     public static Logger getLogger(Object thiz) {
-        return new Logger(thiz != null ? thiz.getClass().getName() : "null");
+        return new Logger(thiz != null ? thiz.toString() : "null");
     }
 
     private static synchronized void logEvent(LogEvent event) {
@@ -125,7 +112,7 @@ public class Logger {
         long ts = System.currentTimeMillis();
 
         LogEvent event = new LogEvent(name, ts, level, msg, args);
-        logExecutor.execute(() -> logEvent(event));
+        logEvent(event);
     }
 
     class LogEvent {

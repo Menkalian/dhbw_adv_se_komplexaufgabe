@@ -3,6 +3,7 @@ package dhbw.ase.app3;
 import java.util.ArrayList;
 import java.util.Iterator;
 import java.util.List;
+import java.util.Objects;
 import java.util.function.Function;
 
 public class ParameterRange<T> implements Iterator<T>, Iterable<T> {
@@ -13,7 +14,7 @@ public class ParameterRange<T> implements Iterator<T>, Iterable<T> {
         T obj = min;
         values.add(obj);
 
-        while (obj != max) {
+        while (!Objects.equals(obj, max)) {
             obj = step.apply(obj);
             values.add(obj);
         }

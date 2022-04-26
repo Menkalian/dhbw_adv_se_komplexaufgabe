@@ -9,5 +9,5 @@ dependencies {
 
 application {
     // Define the main class for the gradle `run`-Task
-    mainClass.set("dhbw.ase.App")
+    mainClass.set("dhbw.ase.app2.App")
 }

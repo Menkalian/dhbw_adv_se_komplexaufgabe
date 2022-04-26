@@ -22,11 +22,7 @@ public class App {
         BruteForceOptimization bfs = new BruteForceOptimization(data);
         Route best = bfs.searchOptimalRoute();
 
-        logger.info("Gefundene Route (Länge: " + best.getTotalDistance() + ": " + best);
-
-        // Shutdown Logger to allow for a graceful stop of the Application
-        // (the alternative way to do this would be to call `System.exit(0)` explicitly)
-        Logger.shutdown();
+        logger.system("Gefundene Route (Länge: " + best.getTotalDistance() + ": " + best);
     }
 
     public static List<City> loadData() {

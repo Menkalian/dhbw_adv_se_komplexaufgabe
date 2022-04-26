@@ -65,7 +65,15 @@ public class BruteForceOptimization {
             if (c >= Config.INSTANCE.maxTries) {
                 break;
             }
-            Route toCheck = permutationWalker.nextPermutation();
+
+            Route toCheck;
+            try {
+                toCheck = permutationWalker.nextPermutation();
+            } catch (RuntimeException ex) {
+                logger.error("Fehler beim Abfragen der Permutationen: %s. Breche Suche ab.", ex.getMessage());
+                break;
+            }
+
             double score = toCheck.getTotalDistance();
             logger.trace("Prüfe Route %d (Länge %01.4f): %s", c, score, toCheck);
 

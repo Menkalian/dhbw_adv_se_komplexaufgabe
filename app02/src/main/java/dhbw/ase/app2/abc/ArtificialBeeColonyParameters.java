@@ -3,7 +3,8 @@ package dhbw.ase.app2.abc;
 import dhbw.ase.json.SerializationHelper;
 
 public class ArtificialBeeColonyParameters {
-    private final SerializationHelper<ArtificialBeeColonyParameters> serializationHelper;
+    // Do not serialize the SerializationHelper
+    private final transient SerializationHelper<ArtificialBeeColonyParameters> serializationHelper;
 
     private final long maxIterations;
 

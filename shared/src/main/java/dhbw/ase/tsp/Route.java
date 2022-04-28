@@ -41,10 +41,9 @@ public class Route {
         if (this == o) {
             return true;
         }
-        if (!(o instanceof Route)) {
+        if (!(o instanceof Route route)) {
             return false;
         }
-        Route route = (Route) o;
         return Objects.equals(getCityOrder(), route.getCityOrder());
     }
 
@@ -53,10 +52,63 @@ public class Route {
         return "{" + cityOrder.stream().map(City::getName).collect(Collectors.joining(" -> ")) + "}";
     }
 
+    public Route partialShift(int startPoint, int goalPoint, int length) {
+        List<City> changed = new ArrayList<>(cityOrder);
+        City[] memorized = new City[length];
+        for (int i = 0 ; i < length ; i++) {
+            memorized[i] = changed.get(startPoint + i);
+        }
+
+        if (startPoint < goalPoint) {
+            for (int i = startPoint ; i < goalPoint ; i++) {
+                changed.set(i, changed.get(i + length));
+            }
+        } else {
+            for (int i = startPoint + length - 1 ; i >= goalPoint + length ; i--) {
+                changed.set(i, changed.get(i - length));
+            }
+        }
+
+        for (int i = 0 ; i < length ; i++) {
+            changed.set(goalPoint + i, memorized[i]);
+        }
+
+        return new Route(changed);
+    }
+
+    public Route partialReverse(int startPoint, int length) {
+        List<City> changed = new ArrayList<>(cityOrder);
+        // If length is uneven the middle element does not need to be swapped
+        for (int i = 0 ; i < length / 2 ; i++) {
+            Collections.swap(changed, startPoint + i, startPoint + length - 1 - i);
+        }
+
+        return new Route(changed);
+    }
+
+    public Route swapped(int i1, int i2) {
+        if (i1 == i2) {
+            return this;
+        }
+
+        List<City> changed = new ArrayList<>(cityOrder);
+        Collections.swap(changed, i1, i2);
+        return new Route(changed);
+    }
+
+    public Route blockSwap(int startPoint, int goalPoint, int length) {
+        List<City> changed = new ArrayList<>(cityOrder);
+        for (int i = 0 ; i < length ; i++) {
+            Collections.swap(changed, startPoint + i, goalPoint + 1);
+        }
+        return new Route(changed);
+    }
+
     private double distanceForIndex(int i) {
         City first = cityOrder.get(i);
         City second = cityOrder.get((i + 1) % cityOrder.size());
 
-        return first.distance(second);
+        // We round here so we get the same result as the known optimum with the perfect route
+        return Math.round(first.distance(second));
     }
 }

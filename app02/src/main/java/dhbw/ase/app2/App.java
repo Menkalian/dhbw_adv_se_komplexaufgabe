@@ -26,7 +26,7 @@ public class App {
         ArtificialBeeColonyOptimization abc = new ArtificialBeeColonyOptimization(data, abcParameters);
         Route optimalRoute = abc.findOptimalRoute();
 
-        logger.system("Route mit der Länge %.4f wurde gefunden: %s", optimalRoute.getTotalDistance(), optimalRoute);
+        logger.system("Route mit der Länge %.1f wurde gefunden: %s", optimalRoute.getTotalDistance(), optimalRoute);
     }
 
     public static List<City> loadData() {

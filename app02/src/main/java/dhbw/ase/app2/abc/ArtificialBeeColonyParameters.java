@@ -1,9 +1,11 @@
 package dhbw.ase.app2.abc;
 
+import java.util.Map;
+
 import dhbw.ase.json.SerializationHelper;
 
 public class ArtificialBeeColonyParameters {
-    // Do not serialize the SerializationHelper
+    // transient = Do not serialize the SerializationHelper
     private final transient SerializationHelper<ArtificialBeeColonyParameters> serializationHelper;
 
     private final long maxIterations;
@@ -12,16 +14,16 @@ public class ArtificialBeeColonyParameters {
     private final int onlookerBeeCount;
 
     private final int revisitLimit;
-    private final int revisitExplorationRadius;
+    private final Map<NeighbourFindingMethod, Integer> neighbourFindingMethodRatio;
 
-    public ArtificialBeeColonyParameters(long maxIterations, int foodSourceCount, int onlookerBeeCount, int revisitLimit, int revisitExplorationRadius) {
+    public ArtificialBeeColonyParameters(long maxIterations, int foodSourceCount, int onlookerBeeCount, int revisitLimit, Map<NeighbourFindingMethod, Integer> neighbourFindingMethodRatio) {
         this.serializationHelper = new SerializationHelper<>(ArtificialBeeColonyParameters.class);
 
         this.maxIterations = maxIterations;
         this.foodSourceCount = foodSourceCount;
         this.onlookerBeeCount = onlookerBeeCount;
         this.revisitLimit = revisitLimit;
-        this.revisitExplorationRadius = revisitExplorationRadius;
+        this.neighbourFindingMethodRatio = neighbourFindingMethodRatio;
     }
 
     public long getMaxIterations() {
@@ -40,8 +42,8 @@ public class ArtificialBeeColonyParameters {
         return revisitLimit;
     }
 
-    public int getRevisitExplorationRadius() {
-        return revisitExplorationRadius;
+    public Map<NeighbourFindingMethod, Integer> getNeighbourFindingMethodRatio() {
+        return neighbourFindingMethodRatio;
     }
 
     public String toString() {

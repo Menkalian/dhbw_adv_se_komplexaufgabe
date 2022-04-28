@@ -102,7 +102,7 @@ public class ArtificialBeeColonyOptimization {
     public void checkUpdateGlobalBest(double score, Route route) {
         synchronized (globalBestMutex) {
             if (score < globalBestScore) {
-                logger.info("Neue beste Route: (Länge %.4f): %s", score, route);
+                logger.info("Neue beste Route: (Länge %.1f): %s", score, route);
                 globalBestScore = score;
                 globalBestRoute = route;
             }

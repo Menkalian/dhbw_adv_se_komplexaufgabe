@@ -1,9 +1,11 @@
 package dhbw.ase.app3.search;
 
 import java.util.List;
+import java.util.Map;
 
 import dhbw.ase.app2.abc.ArtificialBeeColonyOptimization;
 import dhbw.ase.app2.abc.ArtificialBeeColonyParameters;
+import dhbw.ase.app2.abc.NeighbourFindingMethod;
 import dhbw.ase.app3.Config;
 import dhbw.ase.log.Logger;
 import dhbw.ase.tsp.City;
@@ -26,18 +28,31 @@ public class BruteForceSearchMethod implements ISearchMethod {
             for (int foodSources : Config.INSTANCE.foodSourceRange) {
                 for (int onlookers : Config.INSTANCE.onlookerBeeRange) {
                     for (int revisitLimit : Config.INSTANCE.revisitLimitRange) {
-                        for (int revisitExploration : Config.INSTANCE.revisitExplorationRadius) {
-                            ArtificialBeeColonyParameters params = new ArtificialBeeColonyParameters(
-                                    iteration,
-                                    foodSources,
-                                    onlookers,
-                                    revisitLimit,
-                                    revisitExploration);
-                            double score = testParameters(params);
-                            if (score < record) {
-                                logger.info("Neue beste Parameter gefunden: %s", params);
-                                record = score;
-                                recordParams = params;
+                        for (int pointSwapWeight : Config.INSTANCE.pointSwapWeight) {
+                            for (int blockSwapWeight : Config.INSTANCE.blockSwapWeight) {
+                                for (int singleShiftWeight : Config.INSTANCE.singleShiftWeight) {
+                                    for (int partialReverseWeight : Config.INSTANCE.partialReverseWeight) {
+                                        for (int partialShiftWeight : Config.INSTANCE.partialShiftWeight) {
+                                            ArtificialBeeColonyParameters params = new ArtificialBeeColonyParameters(
+                                                    iteration,
+                                                    foodSources,
+                                                    onlookers,
+                                                    revisitLimit,
+                                                    Map.of(
+                                                            NeighbourFindingMethod.POINT_SWAP, pointSwapWeight,
+                                                            NeighbourFindingMethod.BLOCK_SWAP, blockSwapWeight,
+                                                            NeighbourFindingMethod.SINGLE_SHIFT, singleShiftWeight,
+                                                            NeighbourFindingMethod.PARTIAL_REVERSE, partialReverseWeight,
+                                                            NeighbourFindingMethod.PARTIAL_SHIFT, partialShiftWeight));
+                                            double score = testParameters(params);
+                                            if (score < record) {
+                                                logger.info("Neue beste Parameter gefunden: %s", params);
+                                                record = score;
+                                                recordParams = params;
+                                            }
+                                        }
+                                    }
+                                }
                             }
                         }
                     }
@@ -54,9 +69,11 @@ public class BruteForceSearchMethod implements ISearchMethod {
 
         for (int i = 0 ; i < Config.INSTANCE.sampleSizePerConfiguration ; i++) {
             logger.debug("Testlauf #%d", i + 1);
+            Logger.setLogLevel(Config.INSTANCE.executionLogLevel);
             ArtificialBeeColonyOptimization abc = new ArtificialBeeColonyOptimization(cities, parameters);
             Route r = abc.findOptimalRoute();
-            logger.trace("Gefundene Route (Länge %.4f): %s", r.getTotalDistance(), r);
+            Logger.setLogLevel(Config.INSTANCE.logLevel);
+            logger.trace("Gefundene Route (Länge %.1f): %s", r.getTotalDistance(), r);
             avg += r.getTotalDistance();
         }
 

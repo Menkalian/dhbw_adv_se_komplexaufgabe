@@ -18,6 +18,7 @@ public class App {
         Logger.setLogLevel(Config.INSTANCE.logLevel);
 
         List<City> data = loadData();
+        Route.getDistanceHelper().precalculateCities(data);
 
         BruteForceOptimization bfs = new BruteForceOptimization(data);
         Route best = bfs.searchOptimalRoute();

@@ -8,6 +8,7 @@ import java.util.concurrent.atomic.AtomicLong;
 import dhbw.ase.log.LogLevel;
 import dhbw.ase.log.Logger;
 import dhbw.ase.random.MersenneTwisterFast;
+import dhbw.ase.tsp.City;
 import dhbw.ase.tsp.Route;
 
 public class EmployedBee {
@@ -153,6 +154,19 @@ public class EmployedBee {
                     goalPoint = rng.nextInt(size);
                 }
 
+                explorationPoint = current.partialShift(startPoint, goalPoint, 1);
+                break;
+            }
+            case WEIGHTED_SINGLE_SHIFT: {
+                int startPoint;
+                synchronized (rng) {
+                    startPoint = rng.nextInt(currentPosition.getCityOrder().size());
+                }
+
+                City c2 = Route.getDistanceHelper().weightedNeighborSelection(current.getCityOrder().get(startPoint));
+                int goalPoint = current.getCityOrder().indexOf(c2);
+
+                // Shift in front of the selected city
                 explorationPoint = current.partialShift(startPoint, goalPoint, 1);
                 break;
             }

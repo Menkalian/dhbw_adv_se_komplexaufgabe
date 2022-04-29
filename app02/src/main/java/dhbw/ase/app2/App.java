@@ -22,11 +22,12 @@ public class App {
         // TODO: Load Json here
         ArtificialBeeColonyParameters abcParameters = Config.INSTANCE.defaultAlgorithmParameters;
         List<City> data = loadData();
+        Route.getDistanceHelper().precalculateCities(data);
 
         ArtificialBeeColonyOptimization abc = new ArtificialBeeColonyOptimization(data, abcParameters);
         Route optimalRoute = abc.findOptimalRoute();
 
-        logger.system("Route mit der Länge %.1f wurde gefunden: %s", optimalRoute.getTotalDistance(), optimalRoute);
+        logger.system("Route mit der Länge %.1f wurde gefunden: %s", optimalRoute.getTotalDistance(), optimalRoute.normalized());
     }
 
     public static List<City> loadData() {

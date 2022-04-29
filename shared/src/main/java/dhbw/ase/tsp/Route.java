@@ -2,16 +2,22 @@ package dhbw.ase.tsp;
 
 import java.util.ArrayList;
 import java.util.Collections;
+import java.util.Comparator;
 import java.util.List;
 import java.util.Objects;
 import java.util.stream.Collectors;
 import java.util.stream.IntStream;
 
 public class Route {
+    private static final DistanceHelper distanceHelper = new DistanceHelper();
     private final List<City> cityOrder;
 
     public Route(List<City> cities) {
         cityOrder = Collections.unmodifiableList(cities);
+    }
+
+    public static DistanceHelper getDistanceHelper() {
+        return distanceHelper;
     }
 
     public List<City> getCityOrder() {
@@ -102,6 +108,26 @@ public class Route {
             Collections.swap(changed, startPoint + i, goalPoint + 1);
         }
         return new Route(changed);
+    }
+
+    public Route normalized() {
+        List<City> cities = new ArrayList<>(cityOrder);
+        City first = cities.stream().min(Comparator.comparing(City::getName)).get();
+        int i = cities.indexOf(first);
+
+        City left = cities.get((i + cities.size() - 1) % cities.size());
+        City right = cities.get((i + 1) % cities.size());
+
+        if (left.getName().compareTo(right.getName()) < 0) {
+            // Shift to end and reverse
+            Collections.rotate(cities, cities.size() - i - 1);
+            Collections.reverse(cities);
+        } else {
+            // Shift to start
+            Collections.rotate(cities, cities.size() - i);
+        }
+
+        return new Route(cities);
     }
 
     private double distanceForIndex(int i) {

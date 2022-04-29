@@ -7,6 +7,7 @@ import dhbw.ase.app2.abc.ArtificialBeeColonyParameters;
 import dhbw.ase.app3.search.ISearchMethod;
 import dhbw.ase.log.Logger;
 import dhbw.ase.tsp.City;
+import dhbw.ase.tsp.Route;
 import dhbw.ase.util.ILoader;
 import dhbw.ase.util.loader.Dataset;
 import dhbw.ase.util.loader.LoaderImpl;
@@ -19,6 +20,7 @@ public class App {
         Logger.setLogLevel(Config.INSTANCE.logLevel);
 
         List<City> cities = loadData();
+        Route.getDistanceHelper().precalculateCities(cities);
         ISearchMethod method = ISearchMethod.getConfiguredInstance(cities);
 
         logger.system("Starte Parametersuche...");

@@ -15,10 +15,10 @@ public enum Config {
 
     public final Dataset dataset = Dataset.A280;
     public final ArtificialBeeColonyParameters defaultAlgorithmParameters = new ArtificialBeeColonyParameters(
-            200_000,
-            30,
-            30,
-            50_000,
+            300_000,
+            50,
+            50,
+            15000,
             Map.of(
                     NeighbourFindingMethod.POINT_SWAP, 8,
                     NeighbourFindingMethod.BLOCK_SWAP, 1,

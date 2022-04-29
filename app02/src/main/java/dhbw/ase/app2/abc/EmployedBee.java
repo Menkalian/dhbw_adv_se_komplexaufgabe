@@ -14,7 +14,7 @@ import dhbw.ase.tsp.Route;
 public class EmployedBee {
     private static final AtomicLong instanceCount = new AtomicLong(0);
 
-    private final Logger logger = Logger.getLogger(this);
+    private final Logger logger;
 
     private final MersenneTwisterFast rng;
     private final Object currentPositionMutex = new Object();
@@ -31,6 +31,7 @@ public class EmployedBee {
 
     public EmployedBee(ArtificialBeeColonyOptimization abc) {
         id = instanceCount.incrementAndGet();
+        logger = Logger.getLogger(this);
         sharedState = abc;
         parameters = abc.getParameters();
         rng = new MersenneTwisterFast(System.nanoTime());
@@ -197,6 +198,7 @@ public class EmployedBee {
             if (score < currentScore) {
                 currentPosition = explorationPoint;
                 currentScore = score;
+                logger.debug("Verbesserten Punkt nach %d Versuchen gefunden", visitCount.get());
                 visitCount.set(0);
                 logPosition(true);
 

@@ -1,5 +1,8 @@
 package dhbw.ase.app2;
 
+import java.text.MessageFormat;
+import java.time.LocalDateTime;
+import java.time.format.DateTimeFormatter;
 import java.util.Map;
 
 import dhbw.ase.app2.abc.ArtificialBeeColonyParameters;
@@ -12,10 +15,16 @@ public enum Config {
 
     public final int parallelThreads = Runtime.getRuntime().availableProcessors();
     public final LogLevel logLevel = LogLevel.INFO;
+    public final LogLevel consoleLogLevel = LogLevel.INFO;
+    public final LogLevel fileLogLevel = LogLevel.WARN;
+    public final String logFilePath = MessageFormat.format(
+            "logs/log_{0}.txt",
+            LocalDateTime.now().format(
+                    DateTimeFormatter.ofPattern("yyyyMMdd-HHmmss")));
 
     public final Dataset dataset = Dataset.A280;
     public final ArtificialBeeColonyParameters defaultAlgorithmParameters = new ArtificialBeeColonyParameters(
-            300_000,
+            20_000,
             50,
             50,
             15000,

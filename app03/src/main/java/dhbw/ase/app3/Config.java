@@ -7,8 +7,11 @@ import dhbw.ase.util.loader.Dataset;
 public enum Config {
     INSTANCE;
 
-    public final LogLevel logLevel = LogLevel.TRACE;
     public final Dataset dataset = Dataset.A280;
+    public final LogLevel logLevel = LogLevel.TRACE;
+    public final LogLevel consoleLogLevel = LogLevel.TRACE;
+    public final LogLevel fileLogLevel = LogLevel.TRACE;
+    public final String logFilePath = null;
 
     public final int sampleSizePerConfiguration = 2;
     public final SearchMethod searchMethod = SearchMethod.BRUTE_FORCE;

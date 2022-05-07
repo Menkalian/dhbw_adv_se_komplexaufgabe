@@ -1,5 +1,8 @@
 package dhbw.ase.log;
 
+import java.io.File;
+import java.io.IOException;
+import java.io.PrintWriter;
 import java.time.Instant;
 import java.time.OffsetDateTime;
 import java.time.ZoneId;
@@ -8,7 +11,9 @@ import java.time.format.DateTimeFormatter;
 public class Logger {
     private static final int MAX_LOG_NAME_LENGTH = 20;
     private static final Logger log = new Logger("Logging");
-
+    private static PrintWriter logFileWriter = null;
+    private static LogLevel maxConsoleLogLevel = LogLevel.TRACE;
+    private static LogLevel maxFileLogLevel = LogLevel.TRACE;
     private static LogLevel maxLogLevel = LogLevel.INFO;
     private final String name;
 
@@ -20,9 +25,56 @@ public class Logger {
         }
     }
 
+    public static void setConfig(LogLevel base, LogLevel console, LogLevel file, String logFile) {
+        if (logFile != null) {
+            try {
+                setLogFile(logFile);
+            } catch (IOException e) {
+                log.error("Fehler beim setzen der Logdatei: ", e.getMessage());
+                e.printStackTrace();
+            }
+        }
+
+        setLogLevel(base);
+        setMaxConsoleLogLevel(console);
+        setMaxFileLogLevel(file);
+    }
+
+    public static void closeLogFile() {
+        log.system("****************************** Ende der Logdatei ******************************");
+        System.out.flush();
+        logFileWriter.flush();
+        logFileWriter.close();
+        logFileWriter = null;
+    }
+
     public static void setLogLevel(LogLevel level) {
         maxLogLevel = level;
-        log.debug("Setze LogLevel auf %s", maxLogLevel);
+        log.system("Setze LogLevel auf %s", maxLogLevel);
+    }
+
+    public static void setMaxConsoleLogLevel(LogLevel maxConsoleLogLevel) {
+        Logger.maxConsoleLogLevel = maxConsoleLogLevel;
+        log.system("Setze LogLevel der Konsole auf %s", Logger.maxConsoleLogLevel);
+    }
+
+    public static void setMaxFileLogLevel(LogLevel maxFileLogLevel) {
+        Logger.maxFileLogLevel = maxFileLogLevel;
+        log.system("Setze LogLevel der LogDatei auf %s", Logger.maxFileLogLevel);
+    }
+
+    public static void setLogFile(String logFilePath) throws IOException {
+        File logFile = new File(logFilePath);
+        if (logFile.isDirectory()) {
+            log.warn("Gesetzter Pfad \"%s\" ist ein Verzeichnis. Verwende Datei \"log.txt\" im gegebenen Verzeichnis", logFile.getPath());
+            logFile = new File(logFile, "log.txt");
+        }
+        logFile.getParentFile().mkdirs();
+        if (!(logFile.exists() || logFile.createNewFile())) {
+            throw new IOException("Could not create LogFile");
+        }
+        logFileWriter = new PrintWriter(logFile);
+        log.system("****************************** Start der Logdatei %s ******************************", logFile.getPath());
     }
 
     public static Logger getLogger(String name) {
@@ -39,14 +91,24 @@ public class Logger {
 
     private static synchronized void logEvent(LogEvent event) {
         String formattedMsg = String.format(event.formatString, event.formatArgs);
-        String logMsg = String.format("%s%s [%" + MAX_LOG_NAME_LENGTH + "s] <%6s> %s%s",
-                                      getColorCode(event.level),
-                                      formatTimestamp(event.timestamp),
-                                      event.loggerName,
-                                      event.level,
-                                      formattedMsg,
-                                      getColorFinish());
-        System.out.println(logMsg);
+        if (event.level.getVisibility() >= maxConsoleLogLevel.getVisibility()) {
+            String logMsg = String.format("%s%s [%" + MAX_LOG_NAME_LENGTH + "s] <%6s> %s%s",
+                                          getColorCode(event.level),
+                                          formatTimestamp(event.timestamp),
+                                          event.loggerName,
+                                          event.level,
+                                          formattedMsg,
+                                          getColorFinish());
+            System.out.println(logMsg);
+        }
+        if (event.level.getVisibility() >= maxFileLogLevel.getVisibility() && logFileWriter != null) {
+            String logMsg = String.format("%s [%" + MAX_LOG_NAME_LENGTH + "s] <%6s> %s",
+                                          formatTimestamp(event.timestamp),
+                                          event.loggerName,
+                                          event.level,
+                                          formattedMsg);
+            logFileWriter.println(logMsg);
+        }
     }
 
     private static String formatTimestamp(long timestampMillis) {

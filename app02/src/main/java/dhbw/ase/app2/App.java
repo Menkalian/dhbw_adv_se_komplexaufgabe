@@ -16,8 +16,11 @@ public class App {
     private static final Logger logger = Logger.getLogger(App.class);
 
     public static void main(String[] args) {
+        Logger.setConfig(Config.INSTANCE.logLevel,
+                         Config.INSTANCE.consoleLogLevel,
+                         Config.INSTANCE.fileLogLevel,
+                         Config.INSTANCE.logFilePath);
         logger.system("Komplexaufgabe App 02 - Start");
-        Logger.setLogLevel(Config.INSTANCE.logLevel);
 
         // TODO: Load Json here
         ArtificialBeeColonyParameters abcParameters = Config.INSTANCE.defaultAlgorithmParameters;
@@ -28,6 +31,7 @@ public class App {
         Route optimalRoute = abc.findOptimalRoute();
 
         logger.system("Route mit der Länge %.1f wurde gefunden: %s", optimalRoute.getTotalDistance(), optimalRoute.normalized());
+        Logger.closeLogFile();
     }
 
     public static List<City> loadData() {

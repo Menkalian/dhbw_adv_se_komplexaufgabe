@@ -9,6 +9,9 @@ public enum Config {
 
     public final int parallelThreads = Runtime.getRuntime().availableProcessors();
     public final LogLevel logLevel = LogLevel.INFO;
+    public final LogLevel consoleLogLevel = LogLevel.INFO;
+    public final LogLevel fileLogLevel = LogLevel.INFO;
+    public final String logFilePath = null;
 
     public final Dataset dataset = Dataset.A280;
     public final PermutationMode permutationMode = PermutationMode.RANDOMIZED;

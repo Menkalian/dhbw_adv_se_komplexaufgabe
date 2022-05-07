@@ -14,8 +14,11 @@ public class App {
     private static final Logger logger = Logger.getLogger(App.class);
 
     public static void main(String[] args) {
+        Logger.setConfig(Config.INSTANCE.logLevel,
+                         Config.INSTANCE.consoleLogLevel,
+                         Config.INSTANCE.fileLogLevel,
+                         Config.INSTANCE.logFilePath);
         logger.system("Komplexaufgabe App 01 - Start");
-        Logger.setLogLevel(Config.INSTANCE.logLevel);
 
         List<City> data = loadData();
         Route.getDistanceHelper().precalculateCities(data);
@@ -24,6 +27,7 @@ public class App {
         Route best = bfs.searchOptimalRoute();
 
         logger.system("Gefundene Route (Länge: " + best.getTotalDistance() + ": " + best);
+        Logger.closeLogFile();
     }
 
     public static List<City> loadData() {

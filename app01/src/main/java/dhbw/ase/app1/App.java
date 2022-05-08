@@ -14,19 +14,20 @@ public class App {
     private static final Logger logger = Logger.getLogger(App.class);
 
     public static void main(String[] args) {
+        Logger.setConfig(Config.INSTANCE.logLevel,
+                         Config.INSTANCE.consoleLogLevel,
+                         Config.INSTANCE.fileLogLevel,
+                         Config.INSTANCE.logFilePath);
         logger.system("Komplexaufgabe App 01 - Start");
-        Logger.setLogLevel(Config.INSTANCE.logLevel);
 
         List<City> data = loadData();
+        Route.getDistanceHelper().precalculateCities(data);
 
         BruteForceOptimization bfs = new BruteForceOptimization(data);
         Route best = bfs.searchOptimalRoute();
 
-        logger.info("Gefundene Route (Länge: " + best.getTotalDistance() + ": " + best);
-
-        // Shutdown Logger to allow for a graceful stop of the Application
-        // (the alternative way to do this would be to call `System.exit(0)` explicitly)
-        Logger.shutdown();
+        logger.system("Gefundene Route (Länge: " + best.getTotalDistance() + ": " + best);
+        Logger.closeLogFile();
     }
 
     public static List<City> loadData() {

@@ -65,12 +65,20 @@ public class BruteForceOptimization {
             if (c >= Config.INSTANCE.maxTries) {
                 break;
             }
-            Route toCheck = permutationWalker.nextPermutation();
+
+            Route toCheck;
+            try {
+                toCheck = permutationWalker.nextPermutation();
+            } catch (RuntimeException ex) {
+                logger.error("Fehler beim Abfragen der Permutationen: %s. Breche Suche ab.", ex.getMessage());
+                break;
+            }
+
             double score = toCheck.getTotalDistance();
-            logger.trace("Prüfe Route %d (Länge %01.4f): %s", c, score, toCheck);
+            logger.trace("Prüfe Route %d (Länge %.1f): %s", c, score, toCheck);
 
             if (score < bestScore) {
-                logger.debug("Neue (lokal) beste Route: (Länge %01.4f): %s", score, toCheck);
+                logger.debug("Neue (lokal) beste Route: (Länge %.1f): %s", score, toCheck);
                 bestScore = score;
                 bestRoute = toCheck;
             }
@@ -78,7 +86,7 @@ public class BruteForceOptimization {
 
         synchronized (bestMutex) {
             if (bestScore < this.bestScore) {
-                logger.debug("Neue beste Route: (Länge %01.4f): %s", bestScore, bestRoute);
+                logger.debug("Neue beste Route: (Länge %.1f): %s", bestScore, bestRoute);
                 this.bestScore = bestScore;
                 this.bestRoute = bestRoute;
             }

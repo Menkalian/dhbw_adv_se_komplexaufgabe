@@ -32,8 +32,8 @@ public class City {
     }
 
     @Override
-    public String toString() {
-        return getName() + "(" + getX() + "," + getY() + ")";
+    public int hashCode() {
+        return Objects.hash(getName(), getX(), getY());
     }
 
     @Override
@@ -41,15 +41,15 @@ public class City {
         if (this == o) {
             return true;
         }
-        if (!(o instanceof City)) {
+        if (o instanceof City c) {
+            return this.x == c.x && this.y == c.y;
+        } else {
             return false;
         }
-        City city = (City) o;
-        return getX() == city.getX() && getY() == city.getY() && Objects.equals(getName(), city.getName());
     }
 
     @Override
-    public int hashCode() {
-        return Objects.hash(getName(), getX(), getY());
+    public String toString() {
+        return getName() + "(" + getX() + "," + getY() + ")";
     }
 }

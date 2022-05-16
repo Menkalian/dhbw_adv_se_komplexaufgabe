@@ -24,7 +24,7 @@ public enum Config {
 
     public final Dataset dataset = Dataset.A280;
     public final ArtificialBeeColonyParameters defaultAlgorithmParameters = new ArtificialBeeColonyParameters(
-            125_000,
+            200_000,
             50,
             50,
             15_000,

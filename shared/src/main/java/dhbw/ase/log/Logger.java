@@ -43,9 +43,11 @@ public class Logger {
     public static void closeLogFile() {
         log.system("****************************** Ende der Logdatei ******************************");
         System.out.flush();
-        logFileWriter.flush();
-        logFileWriter.close();
-        logFileWriter = null;
+        if (logFileWriter != null) {
+            logFileWriter.flush();
+            logFileWriter.close();
+            logFileWriter = null;
+        }
     }
 
     public static void setLogLevel(LogLevel level) {

@@ -1,10 +1,13 @@
 package dhbw.ase.app2;
 
+import java.io.FileInputStream;
+import java.io.IOException;
 import java.util.List;
 import java.util.stream.Collectors;
 
 import dhbw.ase.app2.abc.ArtificialBeeColonyOptimization;
 import dhbw.ase.app2.abc.ArtificialBeeColonyParameters;
+import dhbw.ase.json.SerializationHelper;
 import dhbw.ase.log.Logger;
 import dhbw.ase.tsp.City;
 import dhbw.ase.tsp.Route;
@@ -22,8 +25,32 @@ public class App {
                          Config.INSTANCE.logFilePath);
         logger.system("Komplexaufgabe App 02 - Start");
 
-        // TODO: Load Json here
+        // Load default algorithm parameters
         ArtificialBeeColonyParameters abcParameters = Config.INSTANCE.defaultAlgorithmParameters;
+
+        if (args != null && args.length >= 2) {
+            for (int i = 0 ; i < args.length ; i++) {
+
+                if ("-best".equals(args[i])) {
+                    int fileNameIndex = i + 1;
+                    if (fileNameIndex < args.length) {
+                        String fileName = args[fileNameIndex];
+                        try (FileInputStream fis = new FileInputStream(fileName)) {
+                            abcParameters = new SerializationHelper<>(ArtificialBeeColonyParameters.class)
+                                    .deserialize(new String(fis.readAllBytes()));
+                            logger.info("Verwende Parameter aus Datei %s: %s", fileName, abcParameters);
+                        } catch (IOException ex) {
+                            logger.error("Fehler beim Lesen der Parameterdatei %s: %s", fileName, ex.getMessage());
+                            ex.printStackTrace();
+                            throw new RuntimeException(ex);
+                        }
+                    } else {
+                        logger.error("Kein Dateiname für die Parameterdatei angegeben. Verwende Standardparameter.");
+                    }
+                }
+            }
+        }
+
         List<City> data = loadData();
         Route.getDistanceHelper().precalculateCities(data);
 

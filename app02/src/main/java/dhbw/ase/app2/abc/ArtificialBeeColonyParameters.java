@@ -1,6 +1,7 @@
 package dhbw.ase.app2.abc;
 
 import java.util.Map;
+import java.util.Objects;
 
 import dhbw.ase.json.SerializationHelper;
 
@@ -47,6 +48,9 @@ public class ArtificialBeeColonyParameters {
     }
 
     public String toString() {
-        return serializationHelper.serialize(this);
+        // If the object was loaded from a JSON, then serializationHelper is null
+        return Objects
+                .requireNonNullElseGet(serializationHelper, () -> new SerializationHelper<>(ArtificialBeeColonyParameters.class))
+                .serialize(this);
     }
 }

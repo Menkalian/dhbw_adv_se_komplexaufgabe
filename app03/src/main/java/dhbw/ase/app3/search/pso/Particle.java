@@ -1,5 +1,6 @@
 package dhbw.ase.app3.search.pso;
 
+import dhbw.ase.app2.abc.ArtificialBeeColonyParameters;
 import dhbw.ase.log.Logger;
 import dhbw.ase.random.MersenneTwisterFast;
 import dhbw.ase.tsp.Route;
@@ -11,9 +12,9 @@ public class Particle {
     MersenneTwisterFast rng;
 
     double personalBest = Double.MAX_VALUE;
-    Route personalBestRoute;
+    ArtificialBeeColonyParameters personalBestParameters;
 
-    Route coordinates;
+    ArtificialBeeColonyParameters parameters;
     Transpositions velocity;
 
     public Particle(ParticleSwarmOptimization pso) {
@@ -22,8 +23,8 @@ public class Particle {
     }
 
     public void initialize() {
-        coordinates = new Route(sharedState.getCities()).shuffled();
-        velocity = coordinates.difference(coordinates.shuffled());
+        parameters = new Route(sharedState.getCities()).shuffled();
+        velocity = parameters.difference(parameters.shuffled());
 
         updatePersonalBest();
 
@@ -38,13 +39,13 @@ public class Particle {
     }
 
     private void updateVelocity() {
-        PsoParameters p = sharedState.getParameters();
+        PsoParameters p = sharedState.getPsoParameters();
 
         double cognitiveFactor = p.getCognitiveRatio() * rng.nextDouble();
-        Transpositions cognitiveVelocity = personalBestRoute.difference(coordinates);
+        Transpositions cognitiveVelocity = personalBestParameters.difference(parameters);
 
         double socialFactor = p.getSocialRatio() * rng.nextDouble();
-        Transpositions socialVelocity = sharedState.getGlobalBestRoute().difference(coordinates);
+        Transpositions socialVelocity = sharedState.getGlobalBestParameters().difference(parameters);
 
         velocity = velocity.times(p.getInertia())
                 .add(cognitiveVelocity.times(cognitiveFactor))
@@ -52,17 +53,17 @@ public class Particle {
     }
 
     private void updateCoordinates() {
-        coordinates = velocity.addTo(coordinates);
+        parameters = velocity.addTo(parameters);
     }
 
     private void updatePersonalBest() {
-        Route route = coordinates;
+        Route route = parameters;
         double score = route.getTotalDistance();
 
         if (score < personalBest) {
             logger.debug("Neue (lokal) beste Route: (Länge %01.4f): %s", score, route);
             personalBest = score;
-            personalBestRoute = route;
+            personalBestParameters = route;
             sharedState.checkUpdateGBest(score, route);
         }
     }

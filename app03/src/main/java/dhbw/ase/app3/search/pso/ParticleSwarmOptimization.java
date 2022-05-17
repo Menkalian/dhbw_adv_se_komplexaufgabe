@@ -1,9 +1,9 @@
 package dhbw.ase.app3.search.pso;
 
 import dhbw.ase.app2.Config;
+import dhbw.ase.app2.abc.ArtificialBeeColonyParameters;
 import dhbw.ase.log.Logger;
 import dhbw.ase.tsp.City;
-import dhbw.ase.tsp.Route;
 
 import java.util.Collections;
 import java.util.LinkedList;
@@ -15,29 +15,29 @@ import java.util.concurrent.Executors;
 public class ParticleSwarmOptimization {
     private final static Logger logger = Logger.getLogger(ParticleSwarmOptimization.class);
     private final List<City> cities;
-    private final PsoParameters parameters;
+    private final PsoParameters psoParameters;
     private final ExecutorService executorService;
 
     private final List<Particle> particles;
     private final Object globalBestMutex = new Object();
     private CountDownLatch iterationLatch;
     private double globalBest = Double.MAX_VALUE;
-    private Route globalBestRoute = null;
+    private ArtificialBeeColonyParameters globalBestParameters = null;
 
-    public ParticleSwarmOptimization(List<City> cities, PsoParameters parameters) {
+    public ParticleSwarmOptimization(List<City> cities, PsoParameters psoParameters) {
         this.executorService = Executors.newFixedThreadPool(Config.INSTANCE.parallelThreads);
         this.cities = Collections.unmodifiableList(cities);
-        this.parameters = parameters;
+        this.psoParameters = psoParameters;
 
         logger.info("Initialisiere ParticleSwarmOptimization (Threads: " + Config.INSTANCE.parallelThreads + ")");
 
         particles = new LinkedList<>();
-        for (int i = 0; i < parameters.getParticleCount(); i++) {
+        for (int i = 0; i < psoParameters.getParticleCount(); i++) {
             particles.add(new Particle(this));
         }
     }
 
-    public Route findOptimalRoute() {
+    public ArtificialBeeColonyParameters findOptimalParameters() {
         // initialize
         iterationLatch = new CountDownLatch(particles.size());
 
@@ -67,20 +67,20 @@ public class ParticleSwarmOptimization {
                 logger.warn("ParticleSwarmOptimization wurde unterbrochen: %s", e.getMessage());
                 throw new RuntimeException(e);
             }
-        } while (++iteration < parameters.getMaxIterations() && !particlesConverged());
+        } while (++iteration < psoParameters.getMaxIterations() && !particlesConverged());
 
         // After the last iteration no tasks remain, so we do not need to wait for the service to shut down
         executorService.shutdown();
 
-        return globalBestRoute;
+        return globalBestParameters;
     }
 
     public List<City> getCities() {
         return cities;
     }
 
-    public PsoParameters getParameters() {
-        return parameters;
+    public PsoParameters getPsoParameters() {
+        return psoParameters;
     }
 
     public void countDown() {
@@ -89,18 +89,18 @@ public class ParticleSwarmOptimization {
         }
     }
 
-    public Route getGlobalBestRoute() {
+    public ArtificialBeeColonyParameters getGlobalBestParameters() {
         synchronized (globalBestMutex) {
-            return globalBestRoute;
+            return globalBestParameters;
         }
     }
 
-    public void checkUpdateGBest(double score, Route route) {
+    public void checkUpdateGBest(double score, ArtificialBeeColonyParameters parameters) {
         synchronized (globalBestMutex) {
             if (score < globalBest) {
-                logger.debug("Neue beste Route: (Länge %01.4f): %s", score, route);
+                logger.debug("Neue beste Route: (Länge %01.4f): %s", score, parameters);
                 globalBest = score;
-                globalBestRoute = route;
+                globalBestParameters = parameters;
             }
         }
     }

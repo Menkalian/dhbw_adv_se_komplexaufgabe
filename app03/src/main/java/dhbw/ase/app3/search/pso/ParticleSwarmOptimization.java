@@ -14,7 +14,7 @@ import java.util.concurrent.Executors;
 
 public class ParticleSwarmOptimization {
     private final static Logger logger = Logger.getLogger(ParticleSwarmOptimization.class);
-    private final List<City> cities;
+    private final ArtificialBeeColonyParameters params;
     private final PsoParameters psoParameters;
     private final ExecutorService executorService;
 
@@ -24,9 +24,9 @@ public class ParticleSwarmOptimization {
     private double globalBest = Double.MAX_VALUE;
     private ArtificialBeeColonyParameters globalBestParameters = null;
 
-    public ParticleSwarmOptimization(List<City> cities, PsoParameters psoParameters) {
+    public ParticleSwarmOptimization(ArtificialBeeColonyParameters params, PsoParameters psoParameters) {
         this.executorService = Executors.newFixedThreadPool(Config.INSTANCE.parallelThreads);
-        this.cities = Collections.unmodifiableList(cities);
+        this.params = params;
         this.psoParameters = psoParameters;
 
         logger.info("Initialisiere ParticleSwarmOptimization (Threads: " + Config.INSTANCE.parallelThreads + ")");
@@ -75,8 +75,8 @@ public class ParticleSwarmOptimization {
         return globalBestParameters;
     }
 
-    public List<City> getCities() {
-        return cities;
+    public List<City> getParams() {
+        return params;
     }
 
     public PsoParameters getPsoParameters() {

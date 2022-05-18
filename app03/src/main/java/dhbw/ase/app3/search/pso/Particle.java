@@ -23,7 +23,7 @@ public class Particle {
     }
 
     public void initialize() {
-        parameters = new Route(sharedState.getCities()).shuffled();
+        parameters = new Route(sharedState.getParams()).shuffled();
         velocity = parameters.difference(parameters.shuffled());
 
         updatePersonalBest();

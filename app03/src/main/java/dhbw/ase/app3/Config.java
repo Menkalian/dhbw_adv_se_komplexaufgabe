@@ -1,8 +1,12 @@
 package dhbw.ase.app3;
 
+import java.util.Map;
+
 import dhbw.ase.app3.search.SearchMethod;
 import dhbw.ase.log.LogLevel;
 import dhbw.ase.util.loader.Dataset;
+
+import static dhbw.ase.app3.OptimizationParameter.*;
 
 public enum Config {
     INSTANCE;
@@ -17,22 +21,16 @@ public enum Config {
     public final SearchMethod searchMethod = SearchMethod.BRUTE_FORCE;
     public final LogLevel executionLogLevel = LogLevel.SYSTEM;
 
-    public final ParameterRange<Integer> iterationRange =
-            new ParameterRange<>(100_000, 100_000, i -> i + 50_000);
-    public final ParameterRange<Integer> foodSourceRange =
-            new ParameterRange<>(30, 30, i -> i + 1);
-    public final ParameterRange<Integer> onlookerBeeRange =
-            new ParameterRange<>(30, 30, i -> i + 1);
-    public final ParameterRange<Integer> revisitLimitRange =
-            new ParameterRange<>(5000, 15_000, i -> i + 5000);
-    public final ParameterRange<Integer> pointSwapWeight =
-            new ParameterRange<>(0, 3, i -> i + 1);
-    public final ParameterRange<Integer> blockSwapWeight =
-            new ParameterRange<>(0, 3, i -> i + 1);
-    public final ParameterRange<Integer> singleShiftWeight =
-            new ParameterRange<>(0, 3, i -> i + 1);
-    public final ParameterRange<Integer> partialReverseWeight =
-            new ParameterRange<>(0, 3, i -> i + 1);
-    public final ParameterRange<Integer> partialShiftWeight =
-            new ParameterRange<>(0, 3, i -> i + 1);
+    public final Map<OptimizationParameter, ParameterRange<Double>> parameterRanges = Map.of(
+            ITERATION, new ParameterRange<>(100_000.0, 100_000.0, i -> i + 50_000),
+            FOOD_SOURCES, new ParameterRange<>(30.0, 30.0, i -> i + 1),
+            ONLOOKER_BEES, new ParameterRange<>(30.0, 30.0, i -> i + 1),
+            REVISIT_LIMIT, new ParameterRange<>(5000.0, 15_000.0, i -> i + 5000),
+            POINT_SWAP_WEIGHT, new ParameterRange<>(0.0, 3.0, i -> i + 1),
+            BLOCK_SWAP_WEIGHT, new ParameterRange<>(0.0, 3.0, i -> i + 1),
+            SINGLE_SHIFT_WEIGHT, new ParameterRange<>(0.0, 3.0, i -> i + 1),
+            WEIGHTED_SINGLE_SHIFT_WEIGHT, new ParameterRange<>(0.0, 3.0, i -> i + 1),
+            PARTIAL_REVERSE_WEIGHT, new ParameterRange<>(0.0, 3.0, i -> i + 1),
+            PARTIAL_SHIFT_WEIGHT, new ParameterRange<>(0.0, 3.0, i -> i + 1)
+    );
 }

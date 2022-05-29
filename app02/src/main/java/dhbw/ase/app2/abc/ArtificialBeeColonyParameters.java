@@ -1,5 +1,6 @@
 package dhbw.ase.app2.abc;
 
+import java.util.HashMap;
 import java.util.Map;
 import java.util.Objects;
 
@@ -45,6 +46,58 @@ public class ArtificialBeeColonyParameters {
 
     public Map<NeighbourFindingMethod, Integer> getNeighbourFindingMethodRatio() {
         return neighbourFindingMethodRatio;
+    }
+
+    public ArtificialBeeColonyParameters withMaxIterations(long maxIterations) {
+        return new ArtificialBeeColonyParameters(
+                maxIterations,
+                this.foodSourceCount,
+                this.onlookerBeeCount,
+                this.revisitLimit,
+                new HashMap<>(this.neighbourFindingMethodRatio)
+        );
+    }
+
+    public ArtificialBeeColonyParameters withFoodSourceCount(int foodSourceCount) {
+        return new ArtificialBeeColonyParameters(
+                this.maxIterations,
+                foodSourceCount,
+                this.onlookerBeeCount,
+                this.revisitLimit,
+                new HashMap<>(this.neighbourFindingMethodRatio)
+        );
+    }
+
+    public ArtificialBeeColonyParameters withOnlookerBeeCount(int onlookerBeeCount) {
+        return new ArtificialBeeColonyParameters(
+                this.maxIterations,
+                this.foodSourceCount,
+                onlookerBeeCount,
+                this.revisitLimit,
+                new HashMap<>(this.neighbourFindingMethodRatio)
+        );
+    }
+
+    public ArtificialBeeColonyParameters withRevisitLimit(int revisitLimit) {
+        return new ArtificialBeeColonyParameters(
+                this.maxIterations,
+                this.foodSourceCount,
+                this.onlookerBeeCount,
+                revisitLimit,
+                new HashMap<>(this.neighbourFindingMethodRatio)
+        );
+    }
+
+    public ArtificialBeeColonyParameters withNeighborFindingMethodWeight(NeighbourFindingMethod method, int weight) {
+        Map<NeighbourFindingMethod, Integer> newNeighborFindingMethodRatio = new HashMap<>(this.neighbourFindingMethodRatio);
+        newNeighborFindingMethodRatio.put(method, weight);
+        return new ArtificialBeeColonyParameters(
+                this.maxIterations,
+                this.foodSourceCount,
+                this.onlookerBeeCount,
+                this.revisitLimit,
+                newNeighborFindingMethodRatio
+        );
     }
 
     public String toString() {

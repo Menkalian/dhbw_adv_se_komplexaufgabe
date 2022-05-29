@@ -1,10 +1,15 @@
 package dhbw.ase.app3.search.pso;
 
+import java.util.HashMap;
+import java.util.Map;
+
+import dhbw.ase.app2.abc.ArtificialBeeColonyOptimization;
 import dhbw.ase.app2.abc.ArtificialBeeColonyParameters;
+import dhbw.ase.app3.Config;
+import dhbw.ase.app3.OptimizationParameter;
 import dhbw.ase.log.Logger;
 import dhbw.ase.random.MersenneTwisterFast;
 import dhbw.ase.tsp.Route;
-import dhbw.ase.tsp.Transpositions;
 
 public class Particle {
     private final static Logger logger = Logger.getLogger(Particle.class);
@@ -12,10 +17,10 @@ public class Particle {
     MersenneTwisterFast rng;
 
     double personalBest = Double.MAX_VALUE;
-    ArtificialBeeColonyParameters personalBestParameters;
+    Map<OptimizationParameter, Double> personalBestParameters;
 
-    ArtificialBeeColonyParameters parameters;
-    Transpositions velocity;
+    Map<OptimizationParameter, Double> parameters;
+    Map<OptimizationParameter, Double> velocity;
 
     public Particle(ParticleSwarmOptimization pso) {
         sharedState = pso;
@@ -23,48 +28,90 @@ public class Particle {
     }
 
     public void initialize() {
-        parameters = new Route(sharedState.getParams()).shuffled();
-        velocity = parameters.difference(parameters.shuffled());
+        parameters = sharedState.getRandomPosition();
+        velocity = difference(parameters, sharedState.getRandomPosition());
 
         updatePersonalBest();
-
-        sharedState.countDown();
     }
 
     public void runIteration() {
         updateVelocity();
         updateCoordinates();
         updatePersonalBest();
-        sharedState.countDown();
     }
 
     private void updateVelocity() {
-        PsoParameters p = sharedState.getPsoParameters();
+        ParticleSwarmOptimizationParameters p = sharedState.getPsoParameters();
 
         double cognitiveFactor = p.getCognitiveRatio() * rng.nextDouble();
-        Transpositions cognitiveVelocity = personalBestParameters.difference(parameters);
+        Map<OptimizationParameter, Double> cognitiveVelocity = difference(personalBestParameters, parameters);
 
         double socialFactor = p.getSocialRatio() * rng.nextDouble();
-        Transpositions socialVelocity = sharedState.getGlobalBestParameters().difference(parameters);
+        Map<OptimizationParameter, Double> socialVelocity = difference(sharedState.getGlobalBestParameters(), parameters);
 
-        velocity = velocity.times(p.getInertia())
-                .add(cognitiveVelocity.times(cognitiveFactor))
-                .add(socialVelocity.times(socialFactor));
+        multiply(velocity, p.getInertia());
+        multiply(cognitiveVelocity, cognitiveFactor);
+        multiply(socialVelocity, socialFactor);
+        velocity = add(velocity, add(cognitiveVelocity, socialVelocity));
+    }
+
+    private Map<OptimizationParameter, Double> difference(Map<OptimizationParameter, Double> minuend, Map<OptimizationParameter, Double> subtrahend) {
+        Map<OptimizationParameter, Double> result = new HashMap<>();
+        for (OptimizationParameter key : minuend.keySet()) {
+            result.put(key, minuend.get(key) - subtrahend.get(key));
+        }
+        return result;
+    }
+
+    private Map<OptimizationParameter, Double> add(Map<OptimizationParameter, Double> summand1, Map<OptimizationParameter, Double> summand2) {
+        Map<OptimizationParameter, Double> result = new HashMap<>();
+        for (OptimizationParameter key : summand1.keySet()) {
+            result.put(key, summand1.get(key) + summand2.get(key));
+        }
+        result.replaceAll((k, v) -> Math.max(Config.INSTANCE.parameterRanges.get(k).getMax(), Math.min(v, Config.INSTANCE.parameterRanges.get(k).getMin())));
+        return result;
+    }
+
+    private void multiply(Map<OptimizationParameter, Double> velocity, double factor) {
+        velocity.replaceAll((k, v) -> v * factor);
     }
 
     private void updateCoordinates() {
-        parameters = velocity.addTo(parameters);
+        parameters.replaceAll((k, v) -> v + velocity.get(k));
     }
 
     private void updatePersonalBest() {
-        Route route = parameters;
-        double score = route.getTotalDistance();
+        ArtificialBeeColonyParameters parameters = new ArtificialBeeColonyParameters(
+                0L, 0, 0, 0, new HashMap<>());
+
+        for (OptimizationParameter param : this.parameters.keySet()) {
+            parameters = param.getParameterApplyFunction().applyValue(parameters, this.parameters.get(param));
+        }
+
+        double score = testParameters(parameters);
 
         if (score < personalBest) {
-            logger.debug("Neue (lokal) beste Route: (Länge %01.4f): %s", score, route);
+            logger.debug("Neue (lokal) beste Parameter: (Score %.1f): %s", score, parameters);
             personalBest = score;
-            personalBestParameters = route;
-            sharedState.checkUpdateGBest(score, route);
+            personalBestParameters = new HashMap<>(this.parameters);
+            sharedState.checkUpdateGBest(score, new HashMap<>(this.parameters));
         }
+    }
+
+    private double testParameters(ArtificialBeeColonyParameters parameters) {
+        logger.info("Teste Parameter %s", parameters);
+        double avg = 0.0;
+
+        for (int i = 0 ; i < Config.INSTANCE.sampleSizePerConfiguration ; i++) {
+            logger.debug("Testlauf #%d", i + 1);
+            Logger.setLogLevel(Config.INSTANCE.executionLogLevel);
+            ArtificialBeeColonyOptimization abc = new ArtificialBeeColonyOptimization(sharedState.getCities(), parameters);
+            Route r = abc.findOptimalRoute();
+            Logger.setLogLevel(Config.INSTANCE.logLevel);
+            logger.trace("Gefundene Route (Länge %.1f): %s", r.getTotalDistance(), r);
+            avg += r.getTotalDistance();
+        }
+
+        return avg / Config.INSTANCE.sampleSizePerConfiguration;
     }
 }

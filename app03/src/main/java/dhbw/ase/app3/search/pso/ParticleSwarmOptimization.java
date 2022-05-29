@@ -1,107 +1,93 @@
 package dhbw.ase.app3.search.pso;
 
-import dhbw.ase.app2.Config;
-import dhbw.ase.app2.abc.ArtificialBeeColonyParameters;
-import dhbw.ase.log.Logger;
-import dhbw.ase.tsp.City;
-
-import java.util.Collections;
+import java.util.HashMap;
 import java.util.LinkedList;
 import java.util.List;
-import java.util.concurrent.CountDownLatch;
-import java.util.concurrent.ExecutorService;
-import java.util.concurrent.Executors;
+import java.util.Map;
 
+import dhbw.ase.app2.abc.ArtificialBeeColonyParameters;
+import dhbw.ase.app3.Config;
+import dhbw.ase.app3.OptimizationParameter;
+import dhbw.ase.app3.ParameterRange;
+import dhbw.ase.log.Logger;
+import dhbw.ase.random.MersenneTwisterFast;
+import dhbw.ase.tsp.City;
+
+/**
+ * Non parallelized particle swarm optimization for ABC-Parameters.
+ * This is not multithreaded, since the calculation of the fitness is already multithreaded.
+ * A parallelization of this would only increase the load on the scheduler.
+ */
 public class ParticleSwarmOptimization {
     private final static Logger logger = Logger.getLogger(ParticleSwarmOptimization.class);
-    private final ArtificialBeeColonyParameters params;
-    private final PsoParameters psoParameters;
-    private final ExecutorService executorService;
+    private final ParticleSwarmOptimizationParameters params;
+    private final List<City> cities;
 
     private final List<Particle> particles;
-    private final Object globalBestMutex = new Object();
-    private CountDownLatch iterationLatch;
     private double globalBest = Double.MAX_VALUE;
-    private ArtificialBeeColonyParameters globalBestParameters = null;
+    private Map<OptimizationParameter, Double> globalBestParameters = null;
 
-    public ParticleSwarmOptimization(ArtificialBeeColonyParameters params, PsoParameters psoParameters) {
-        this.executorService = Executors.newFixedThreadPool(Config.INSTANCE.parallelThreads);
+    public ParticleSwarmOptimization(ParticleSwarmOptimizationParameters params, List<City> cities) {
         this.params = params;
-        this.psoParameters = psoParameters;
-
-        logger.info("Initialisiere ParticleSwarmOptimization (Threads: " + Config.INSTANCE.parallelThreads + ")");
+        this.cities = cities;
 
         particles = new LinkedList<>();
-        for (int i = 0; i < psoParameters.getParticleCount(); i++) {
+        for (int i = 0 ; i < params.getParticleCount() ; i++) {
             particles.add(new Particle(this));
         }
     }
 
     public ArtificialBeeColonyParameters findOptimalParameters() {
         // initialize
-        iterationLatch = new CountDownLatch(particles.size());
-
         for (Particle particle : particles) {
-            executorService.submit(particle::initialize);
-        }
-
-        try {
-            iterationLatch.await();
-        } catch (InterruptedException e) {
-            throw new RuntimeException(e);
+            particle.initialize();
         }
 
         logger.info("Starte Suche");
-
         long iteration = 0;
         do {
-            iterationLatch = new CountDownLatch(particles.size());
-
             for (Particle particle : particles) {
-                executorService.submit(particle::runIteration);
+                particle.runIteration();
             }
+        } while (++iteration < params.getMaxIterations() && !particlesConverged());
 
-            try {
-                iterationLatch.await();
-            } catch (InterruptedException e) {
-                logger.warn("ParticleSwarmOptimization wurde unterbrochen: %s", e.getMessage());
-                throw new RuntimeException(e);
-            }
-        } while (++iteration < psoParameters.getMaxIterations() && !particlesConverged());
-
-        // After the last iteration no tasks remain, so we do not need to wait for the service to shut down
-        executorService.shutdown();
-
-        return globalBestParameters;
+        // Build result
+        ArtificialBeeColonyParameters parameters = new ArtificialBeeColonyParameters(
+                0L, 0, 0, 0, new HashMap<>());
+        for (OptimizationParameter param : this.globalBestParameters.keySet()) {
+            parameters = param.getParameterApplyFunction().applyValue(parameters, this.globalBestParameters.get(param));
+        }
+        return parameters;
     }
 
-    public List<City> getParams() {
+    public Map<OptimizationParameter, Double> getRandomPosition() {
+        MersenneTwisterFast rng = new MersenneTwisterFast(System.nanoTime());
+
+        Map<OptimizationParameter, Double> position = new HashMap<>();
+        for (OptimizationParameter key : Config.INSTANCE.parameterRanges.keySet()) {
+            ParameterRange<Double> range = Config.INSTANCE.parameterRanges.get(key);
+            position.put(key, range.getMin() + rng.nextDouble() * (range.getMax() - range.getMin()));
+        }
+        return position;
+    }
+
+    public List<City> getCities() {
+        return cities;
+    }
+
+    public ParticleSwarmOptimizationParameters getPsoParameters() {
         return params;
     }
 
-    public PsoParameters getPsoParameters() {
-        return psoParameters;
+    public Map<OptimizationParameter, Double> getGlobalBestParameters() {
+        return globalBestParameters;
     }
 
-    public void countDown() {
-        if (iterationLatch != null) {
-            iterationLatch.countDown();
-        }
-    }
-
-    public ArtificialBeeColonyParameters getGlobalBestParameters() {
-        synchronized (globalBestMutex) {
-            return globalBestParameters;
-        }
-    }
-
-    public void checkUpdateGBest(double score, ArtificialBeeColonyParameters parameters) {
-        synchronized (globalBestMutex) {
-            if (score < globalBest) {
-                logger.debug("Neue beste Route: (Länge %01.4f): %s", score, parameters);
-                globalBest = score;
-                globalBestParameters = parameters;
-            }
+    public void checkUpdateGBest(double score, Map<OptimizationParameter, Double> parameters) {
+        if (score < globalBest) {
+            logger.debug("Neue beste Parameter: (Score %.1f): %s", score, parameters);
+            globalBest = score;
+            globalBestParameters = parameters;
         }
     }
 
@@ -111,7 +97,7 @@ public class ParticleSwarmOptimization {
         double max = particles.stream().map((p) -> p.personalBest).max(Double::compareTo).get();
         logger.debug("Größter Unterschied zwischen der Fitness ist: %f", max - min);
         if (max - min < 0.001) {
-            logger.info("Particle sind convergiert");
+            logger.info("Particle sind konvergiert");
             return true;
         }
         return false;

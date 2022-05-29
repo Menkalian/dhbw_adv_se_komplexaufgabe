@@ -1,6 +1,6 @@
 package dhbw.ase.app3.search.pso;
 
-public class PsoParameters {
+public class ParticleSwarmOptimizationParameters {
     private final long maxIterations;
 
     private final int particleCount;
@@ -9,7 +9,7 @@ public class PsoParameters {
     private final double socialRatio;
     private final double cognitiveRatio;
 
-    public PsoParameters(long maxIterations, int particleCount, double inertia, double socialRatio, double cognitiveRatio) {
+    public ParticleSwarmOptimizationParameters(long maxIterations, int particleCount, double inertia, double socialRatio, double cognitiveRatio) {
         this.maxIterations = maxIterations;
         this.particleCount = particleCount;
         this.inertia = inertia;

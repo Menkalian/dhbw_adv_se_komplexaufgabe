@@ -3,6 +3,7 @@ package dhbw.ase.app3;
 import java.util.Map;
 
 import dhbw.ase.app3.search.SearchMethod;
+import dhbw.ase.app3.search.pso.ParticleSwarmOptimizationParameters;
 import dhbw.ase.log.LogLevel;
 import dhbw.ase.util.loader.Dataset;
 
@@ -18,7 +19,7 @@ public enum Config {
     public final String logFilePath = null;
 
     public final int sampleSizePerConfiguration = 2;
-    public final SearchMethod searchMethod = SearchMethod.BRUTE_FORCE;
+    public final SearchMethod searchMethod = SearchMethod.PARTICLE_SWARM;
     public final LogLevel executionLogLevel = LogLevel.SYSTEM;
 
     public final Map<OptimizationParameter, ParameterRange<Double>> parameterRanges = Map.of(
@@ -33,4 +34,8 @@ public enum Config {
             PARTIAL_REVERSE_WEIGHT, new ParameterRange<>(0.0, 3.0, i -> i + 1),
             PARTIAL_SHIFT_WEIGHT, new ParameterRange<>(0.0, 3.0, i -> i + 1)
     );
+
+    // 5*100*2 = 1000 Runs ~= 1000 min ~= 17h Duration
+    public final ParticleSwarmOptimizationParameters particleSwarmParameters = new ParticleSwarmOptimizationParameters(
+            100, 5, 0.75, 0.9, 0.9);
 }

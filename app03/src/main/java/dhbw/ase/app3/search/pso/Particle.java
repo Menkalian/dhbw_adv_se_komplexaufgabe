@@ -7,6 +7,7 @@ import dhbw.ase.app2.abc.ArtificialBeeColonyOptimization;
 import dhbw.ase.app2.abc.ArtificialBeeColonyParameters;
 import dhbw.ase.app3.Config;
 import dhbw.ase.app3.OptimizationParameter;
+import dhbw.ase.app3.ParameterRange;
 import dhbw.ase.log.Logger;
 import dhbw.ase.random.MersenneTwisterFast;
 import dhbw.ase.tsp.Route;
@@ -77,7 +78,11 @@ public class Particle {
     }
 
     private void updateCoordinates() {
-        parameters.replaceAll((k, v) -> v + velocity.get(k));
+        parameters.replaceAll((k, v) -> clamp(Config.INSTANCE.parameterRanges.get(k), v + velocity.get(k)));
+    }
+
+    private double clamp(ParameterRange<Double> range, double value) {
+        return Double.max(range.getMin(), Double.min(value, range.getMax()));
     }
 
     private void updatePersonalBest() {

@@ -11,9 +11,8 @@ public interface ISearchMethod {
 
     static ISearchMethod getConfiguredInstance(List<City> cities) {
         return switch (Config.INSTANCE.searchMethod) {
-            case BINARY -> null; // TODO
             case BRUTE_FORCE -> new BruteForceSearchMethod(cities);
-            case PARTICLE_SWARM -> null; // TODO
+            case PARTICLE_SWARM -> new PsoSearchMethod(cities);
         };
     }
 }

@@ -7,9 +7,13 @@ import java.util.Objects;
 import java.util.function.Function;
 
 public class ParameterRange<T> implements Iterable<T> {
+    private final T min;
+    private final T max;
     private final List<T> values = new ArrayList<>();
 
     public ParameterRange(T min, T max, Function<T, T> step) {
+        this.min = min;
+        this.max = max;
         T obj = min;
         values.add(obj);
 
@@ -17,6 +21,14 @@ public class ParameterRange<T> implements Iterable<T> {
             obj = step.apply(obj);
             values.add(obj);
         }
+    }
+
+    public T getMin() {
+        return min;
+    }
+
+    public T getMax() {
+        return max;
     }
 
     @Override

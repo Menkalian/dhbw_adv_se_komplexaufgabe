@@ -93,8 +93,8 @@ public class ParticleSwarmOptimization {
 
     private boolean particlesConverged() {
         // Check if particles are converging
-        double min = particles.stream().map((p) -> p.personalBest).min(Double::compareTo).get();
-        double max = particles.stream().map((p) -> p.personalBest).max(Double::compareTo).get();
+        double min = particles.stream().map(Particle::getPersonalBest).min(Double::compareTo).get();
+        double max = particles.stream().map(Particle::getPersonalBest).max(Double::compareTo).get();
         logger.debug("Größter Unterschied zwischen der Fitness ist: %f", max - min);
         if (max - min < 0.001) {
             logger.info("Particle sind konvergiert");

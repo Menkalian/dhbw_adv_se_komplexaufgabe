@@ -13,15 +13,17 @@ import dhbw.ase.random.MersenneTwisterFast;
 import dhbw.ase.tsp.Route;
 
 public class Particle {
-    private final static Logger logger = Logger.getLogger(Particle.class);
-    ParticleSwarmOptimization sharedState;
-    MersenneTwisterFast rng;
+    private static long instanceCount = 0;
+    private final long id = instanceCount++;
+    private final Logger logger = Logger.getLogger("Partikel " + id);
+    private final ParticleSwarmOptimization sharedState;
+    private final MersenneTwisterFast rng;
 
-    double personalBest = Double.MAX_VALUE;
-    Map<OptimizationParameter, Double> personalBestParameters;
+    private double personalBest = Double.MAX_VALUE;
+    private Map<OptimizationParameter, Double> personalBestParameters;
 
-    Map<OptimizationParameter, Double> parameters;
-    Map<OptimizationParameter, Double> velocity;
+    private Map<OptimizationParameter, Double> parameters;
+    private Map<OptimizationParameter, Double> velocity;
 
     public Particle(ParticleSwarmOptimization pso) {
         sharedState = pso;
@@ -54,6 +56,7 @@ public class Particle {
         multiply(cognitiveVelocity, cognitiveFactor);
         multiply(socialVelocity, socialFactor);
         velocity = add(velocity, add(cognitiveVelocity, socialVelocity));
+        logger.trace("Neue Partikelgeschwindigkeit: %s", velocity.toString());
     }
 
     private Map<OptimizationParameter, Double> difference(Map<OptimizationParameter, Double> minuend, Map<OptimizationParameter, Double> subtrahend) {
@@ -69,7 +72,6 @@ public class Particle {
         for (OptimizationParameter key : summand1.keySet()) {
             result.put(key, summand1.get(key) + summand2.get(key));
         }
-        result.replaceAll((k, v) -> Math.max(Config.INSTANCE.parameterRanges.get(k).getMax(), Math.min(v, Config.INSTANCE.parameterRanges.get(k).getMin())));
         return result;
     }
 
@@ -77,8 +79,14 @@ public class Particle {
         velocity.replaceAll((k, v) -> v * factor);
     }
 
+    private void clampPosition(Map<OptimizationParameter, Double> pos) {
+        pos.replaceAll((k, v) -> Math.min(Config.INSTANCE.parameterRanges.get(k).getMax(), Math.max(v, Config.INSTANCE.parameterRanges.get(k).getMin())));
+    }
+
     private void updateCoordinates() {
         parameters.replaceAll((k, v) -> clamp(Config.INSTANCE.parameterRanges.get(k), v + velocity.get(k)));
+        clampPosition(parameters);
+        logger.trace("Neue Partikelposition: %s", parameters.toString());
     }
 
     private double clamp(ParameterRange<Double> range, double value) {
@@ -118,5 +126,9 @@ public class Particle {
         }
 
         return avg / Config.INSTANCE.sampleSizePerConfiguration;
+    }
+
+    public double getPersonalBest() {
+        return personalBest;
     }
 }
